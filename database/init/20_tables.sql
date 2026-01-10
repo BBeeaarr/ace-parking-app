@@ -86,3 +86,4 @@ BEGIN
     PRINT 'Table dbo.invoice_line_items already exists.';
 END
 GO
+PRINT '--- Table Creation Complete ---';

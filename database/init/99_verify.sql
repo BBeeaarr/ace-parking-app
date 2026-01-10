@@ -52,3 +52,36 @@ PRINT 'Rows returned (line items) = ' + CAST(@@ROWCOUNT AS NVARCHAR(20));
 GO
 
 PRINT '--- Verification: invoice totals ---';
+
+SELECT
+    i.invoice_number,
+    SUM(li.total_cost) AS invoice_total
+FROM dbo.invoices i
+JOIN dbo.invoice_line_items li ON li.invoice_number = i.invoice_number
+WHERE i.invoice_number = 5
+GROUP BY i.invoice_number;
+
+PRINT 'Rows returned (totals) = ' + CAST(@@ROWCOUNT AS NVARCHAR(20));
+GO
+
+PRINT '--- Verification: product catalog ---';
+
+SELECT * FROM dbo.products ORDER BY product_name;
+
+PRINT 'Rows returned (products) = ' + CAST(@@ROWCOUNT AS NVARCHAR(20));
+GO
+
+PRINT '--- Verification: line items match products ---';
+
+SELECT
+    li.product_id,
+    li.product_name AS snapshot_name,
+    p.product_name AS catalog_name,
+    li.product_cost AS snapshot_cost,
+    p.product_cost AS catalog_cost
+FROM dbo.invoice_line_items li
+JOIN dbo.products p ON p.product_id = li.product_id;
+
+PRINT 'Rows returned (line item/product match) = ' + CAST(@@ROWCOUNT AS NVARCHAR(20));
+GO
+PRINT '--- Verification complete ---';

@@ -67,3 +67,44 @@ GO
 -- Invoices
 
 IF NOT EXISTS (
+    SELECT 1
+    FROM sys.indexes
+    WHERE name = N'IX_invoices_customer_id'
+      AND object_id = OBJECT_ID(N'dbo.invoices')
+)
+BEGIN
+    PRINT 'Creating index IX_invoices_customer_id...';
+
+    CREATE NONCLUSTERED INDEX IX_invoices_customer_id
+    ON dbo.invoices (customer_id);
+
+    PRINT 'Index IX_invoices_customer_id created.';
+END
+ELSE
+BEGIN
+    PRINT 'Index IX_invoices_customer_id already exists; skipping.';
+END
+GO
+
+-- Invoice Line Items
+
+IF NOT EXISTS (
+    SELECT 1
+    FROM sys.indexes
+    WHERE name = N'IX_invoice_line_items_invoice_number'
+      AND object_id = OBJECT_ID(N'dbo.invoice_line_items')
+)
+BEGIN
+    PRINT 'Creating index IX_invoice_line_items_invoice_number...';
+
+    CREATE NONCLUSTERED INDEX IX_invoice_line_items_invoice_number
+    ON dbo.invoice_line_items (invoice_number);
+
+    PRINT 'Index IX_invoice_line_items_invoice_number created.';
+END
+ELSE
+BEGIN
+    PRINT 'Index IX_invoice_line_items_invoice_number already exists; skipping.';
+END
+GO
+PRINT '--- Index creation complete ---';

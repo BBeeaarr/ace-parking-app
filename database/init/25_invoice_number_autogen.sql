@@ -43,4 +43,5 @@ BEGIN
     PRINT 'Invoices table empty; no reseed required.';
 END
 GO
+PRINT '--- Invoice number sequence alignment complete ---';
 

@@ -3,9 +3,7 @@ PRINT '--- Seeding base data ---';
 DECLARE @CustomerId UNIQUEIDENTIFIER = 'AA5FD07A-05D6-460F-B8E3-6A09142F9D71';
 DECLARE @InvoiceNumber INT = 5;
 
--- =========================
 -- Customer
--- =========================
 
 IF NOT EXISTS (SELECT 1 FROM dbo.customers WHERE customer_id = @CustomerId)
 BEGIN
@@ -44,9 +42,7 @@ BEGIN
 END
 GO
 
--- =========================
 -- Invoice
--- =========================
 
 DECLARE @CustomerId UNIQUEIDENTIFIER = 'AA5FD07A-05D6-460F-B8E3-6A09142F9D71';
 DECLARE @InvoiceNumber INT = 5;
@@ -74,9 +70,7 @@ BEGIN
 END
 GO
 
--- =========================
 -- Products
--- =========================
 
 IF NOT EXISTS (SELECT 1 FROM dbo.products WHERE product_id = '26812D43-CEE0-4413-9A1B-0B2EABF7E92C')
 BEGIN
@@ -114,9 +108,7 @@ END
 ELSE PRINT 'Product Widget already exists; skipping.';
 GO
 
--- =========================
 -- Invoice Line Items
--- =========================
 
 IF NOT EXISTS (SELECT 1 FROM dbo.invoice_line_items WHERE line_item_id = '9D91681F-0971-4170-BBA4-1617E53E7E8C')
 BEGIN

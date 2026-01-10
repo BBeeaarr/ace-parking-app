@@ -9,6 +9,6 @@ BEGIN
 END
 GO
 
--- 2) Switch context explicitly
+-- Switch context explicitly
 USE [AceInvoice];
 GO

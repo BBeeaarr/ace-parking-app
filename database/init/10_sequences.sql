@@ -1,3 +1,5 @@
+PRINT '--- Sequences: invoice number ---';
+
 IF OBJECT_ID(N'dbo.invoice_number_seq', N'SO') IS NULL
 BEGIN
     PRINT 'Creating sequence dbo.invoice_number_seq...';
@@ -12,3 +14,4 @@ BEGIN
     PRINT 'Sequence dbo.invoice_number_seq already exists.';
 END
 GO
+PRINT '--- Sequence setup complete ---';

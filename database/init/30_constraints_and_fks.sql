@@ -73,3 +73,4 @@ BEGIN
     PRINT 'FK_invoice_line_items_products already exists; skipping.';
 END
 GO
+PRINT '--- Foreign key constraints setup complete ---';
