@@ -115,7 +115,6 @@ async function getOrderDetailsByInvoiceNumber(req, res, next) {
     request.input("invoiceNumber", sql.Int, invoiceNumber);
 
     // One query that returns one row per line item (or a single row with null line item columns if none)
-    // IMPORTANT: alias columns to camelCase to satisfy the prompt.
     const result = await request.query(`
       SELECT
         -- customerDetail
@@ -253,7 +252,7 @@ async function createNewOrder(req, res, next) {
     }
   }
 
-  // Optional: combine duplicates by productId (so inserts are clean)
+  // combine duplicates by productId (so inserts are clean)
   const qtyByProductId = new Map();
   for (const p of products) {
     qtyByProductId.set(p.productId, (qtyByProductId.get(p.productId) || 0) + p.quantity);
@@ -267,7 +266,7 @@ async function createNewOrder(req, res, next) {
     const pool = await getPool();
     const tx = new sql.Transaction(pool);
 
-    await tx.begin(sql.ISOLATION_LEVEL.SERIALIZABLE); // simplest safe choice for "MAX+1"
+    await tx.begin(sql.ISOLATION_LEVEL.SERIALIZABLE);
 
     try {
       // ---- 1) Allocate next invoice_number safely ----
@@ -280,12 +279,9 @@ async function createNewOrder(req, res, next) {
       const invoiceNumber = nextInvoiceResult.recordset[0].nextInvoiceNumber;
 
       // ---- 2) Load product details (name + cost) ----
-      // Assumption: dbo.products has product_id, product_name, product_cost.
-      // If your schema differs, change the SELECT/aliases.
       const productIds = distinctProducts.map((p) => p.productId);
 
       const lookupReq = new sql.Request(tx);
-      // Use a table-valued parameter alternative later; MVP uses IN (...) safely via parameters:
       // We'll build parameterized inputs to avoid injection.
       const inParams = productIds.map((id, i) => {
         const key = `pid${i}`;
@@ -352,9 +348,17 @@ async function createNewOrder(req, res, next) {
 
       await tx.commit();
 
-      // ---- 5) Return the created invoice (reuse details function) ----
-      req.params.invoiceNumber = String(invoiceNumber);
-      return getOrderDetailsByInvoiceNumber(req, res, next);
+      // ---- 5) Return the created invoice ----
+      return res.status(201).json({
+        invoiceData: {
+          invoiceDate: invoiceDate.toISOString(),
+          customerId: invoiceData.customerId
+        },
+        products: distinctProducts.map(p => ({
+          productId: p.productId,
+          quantity: p.quantity
+        }))
+      });
     } catch (innerErr) {
       await tx.rollback();
       throw innerErr;
