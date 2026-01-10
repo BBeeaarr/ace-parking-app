@@ -205,17 +205,21 @@ async function getOrderDetailsByInvoiceNumber(req, res, next) {
 
 /**
  * POST /api/order/new
- * Body (example):
+ *
+ * Creates a new invoice and its line items.
+ *
+ * Request body (schema):
  * {
- *   "customerId": "aa5f...9d71",
- *   "invoiceDate": "2024-12-20T14:30:00",
- *   "lineItems": [
- *     {"productId":"...", "quantity":2},
- *     {"productId":"...", "quantity":1}
+ *   "invoiceData": {
+ *     "invoiceDate": "2026-01-10T23:00:00Z",          // ISO-8601 date string (timezone recommended)
+ *     "customerId":  "aa5fd07a-05d6-460f-b8e3-6a09142f9d71" // UUID
+ *   },
+ *   "products": [
+ *     { "productId": "26812d43-cee0-4413-9a1b-0b2eabf7e92c", "quantity": 120 }, // UUID + positive int
+ *     { "productId": "3c85f645-ce57-43a8-b192-7f46f8bbc273", "quantity": 798 }
  *   ]
  * }
  */
-
 async function createNewOrder(req, res, next) {
   const body = req.body || {};
   const invoiceData = body.invoiceData || {};
