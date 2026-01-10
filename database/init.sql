@@ -48,6 +48,26 @@ BEGIN
 END
 GO
 
+IF OBJECT_ID(N'dbo.products', N'U') IS NULL
+BEGIN
+    PRINT 'Creating table dbo.products...';
+
+    CREATE TABLE dbo.products (
+        product_id    UNIQUEIDENTIFIER NOT NULL,
+        product_name  NVARCHAR(200)     NOT NULL,
+        product_cost  DECIMAL(19,4)     NOT NULL,
+
+        CONSTRAINT PK_products PRIMARY KEY CLUSTERED (product_id),
+        CONSTRAINT CK_products_cost_nonneg CHECK (product_cost >= 0)
+    );
+END
+ELSE
+BEGIN
+    PRINT 'Table dbo.products already exists.';
+END
+GO
+
+
 IF OBJECT_ID(N'dbo.invoices', N'U') IS NULL
 BEGIN
     PRINT 'Creating table dbo.invoices...';
@@ -110,6 +130,14 @@ BEGIN
 END
 GO
 
+IF OBJECT_ID(N'dbo.FK_invoice_line_items_products', N'F') IS NULL
+BEGIN
+    ALTER TABLE dbo.invoice_line_items
+    ADD CONSTRAINT FK_invoice_line_items_products
+    FOREIGN KEY (product_id) REFERENCES dbo.products(product_id);
+END
+GO
+
 -- 5) Optional indexes (create only if missing)
 
 IF NOT EXISTS (
@@ -121,6 +149,17 @@ IF NOT EXISTS (
 BEGIN
     CREATE NONCLUSTERED INDEX IX_customers_name
     ON dbo.customers (customer_name);
+END
+GO
+
+IF NOT EXISTS (
+    SELECT 1 FROM sys.indexes
+    WHERE name = N'IX_products_name'
+      AND object_id = OBJECT_ID(N'dbo.products')
+)
+BEGIN
+    CREATE NONCLUSTERED INDEX IX_products_name
+    ON dbo.products (product_name);
 END
 GO
 
@@ -211,6 +250,34 @@ BEGIN
         '2024-12-20T14:30:00',
         @CustomerId
     );
+END
+GO
+
+IF NOT EXISTS (SELECT 1 FROM dbo.products WHERE product_id = '26812D43-CEE0-4413-9A1B-0B2EABF7E92C')
+BEGIN
+    INSERT INTO dbo.products (product_id, product_name, product_cost)
+    VALUES ('26812D43-CEE0-4413-9A1B-0B2EABF7E92C', N'Thingie', 2.00);
+END
+GO
+
+IF NOT EXISTS (SELECT 1 FROM dbo.products WHERE product_id = '3C85F645-CE57-43A8-B192-7F46F8BBC273')
+BEGIN
+    INSERT INTO dbo.products (product_id, product_name, product_cost)
+    VALUES ('3C85F645-CE57-43A8-B192-7F46F8BBC273', N'Gadget', 5.15);
+END
+GO
+
+IF NOT EXISTS (SELECT 1 FROM dbo.products WHERE product_id = 'A102E2B7-30D6-4AB6-B92B-8570A7E1659C')
+BEGIN
+    INSERT INTO dbo.products (product_id, product_name, product_cost)
+    VALUES ('A102E2B7-30D6-4AB6-B92B-8570A7E1659C', N'Gizmo', 1.00);
+END
+GO
+
+IF NOT EXISTS (SELECT 1 FROM dbo.products WHERE product_id = '9E3EF8CE-A6FD-4C9B-AC5D-C3CB471E1E27')
+BEGIN
+    INSERT INTO dbo.products (product_id, product_name, product_cost)
+    VALUES ('9E3EF8CE-A6FD-4C9B-AC5D-C3CB471E1E27', N'Widget', 2.50);
 END
 GO
 
@@ -312,4 +379,19 @@ FROM dbo.invoices i
 JOIN dbo.invoice_line_items li ON li.invoice_number = i.invoice_number
 WHERE i.invoice_number = 5
 GROUP BY i.invoice_number;
+GO
+
+-- Verify product catalog
+SELECT * FROM dbo.products ORDER BY product_name;
+GO
+
+-- Verify line items match products
+SELECT
+    li.product_id,
+    li.product_name AS snapshot_name,
+    p.product_name AS catalog_name,
+    li.product_cost AS snapshot_cost,
+    p.product_cost AS catalog_cost
+FROM dbo.invoice_line_items li
+JOIN dbo.products p ON p.product_id = li.product_id;
 GO
