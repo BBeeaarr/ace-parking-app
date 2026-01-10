@@ -24,12 +24,15 @@ A REST API for managing customers, products, and orders built with Node.js, Expr
    Create a `.env` file in the root directory:
    ```env
    PORT=3000
-   SA_PASSWORD=YourStrong@Passw0rd
+   API_KEY=dev-key
+
+   DB_SERVER=localhost
+   DB_PORT=1433
    DB_USER=sa
    DB_PASSWORD=YourStrong@Passw0rd
-   DB_SERVER=localhost
-   DB_DATABASE=AceParkingDB
-   API_KEY=your-api-key-here
+   DB_DATABASE=AceInvoice
+   DB_ENCRYPT=true
+   DB_TRUST_SERVER_CERT=true
    ```
 
 4. **Start the API**
