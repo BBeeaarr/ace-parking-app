@@ -11,6 +11,7 @@ A REST API for managing customers, products, and orders built with Node.js, Expr
 
 1. **Clone and install dependencies**
    ```bash
+   git clone https://github.com/BBeeaarr/ace-parking-app.git
    npm install
    ```
 
