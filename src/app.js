@@ -3,6 +3,8 @@ const { notFoundHandler, errorHandler } = require("./middleware/errorHandler");
 
 const publicRoutes = require("./routes/public.routes");
 const customerRoutes = require("./routes/customer.routes");
+const productRoutes = require("./routes/product.routes");
+
 function createApp() {
   const app = express();
 
@@ -10,6 +12,8 @@ function createApp() {
 
 	app.use("/api/public", publicRoutes);
 	app.use("/api/customer", customerRoutes);
+	app.use("/api/product", productRoutes);
+
   // 404 + error middleware
   app.use(notFoundHandler);
   app.use(errorHandler);
