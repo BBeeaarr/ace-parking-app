@@ -19,7 +19,7 @@ A REST API for managing customers, products, and orders built with Node.js, Expr
    ```bash
    docker compose up -d
    ```
-   This will start SQL Server and automatically initialize the database using `database/init.sql`.
+   This will start SQL Server and automatically initialize the database using `database/init/*.sql`. Scripts will run in alphanumeric order.
 
    **Check database initialization logs:**
    ```bash
