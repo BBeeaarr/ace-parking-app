@@ -42,7 +42,7 @@ services:
       sqlserver:
         condition: service_healthy
     volumes:
-      - ./init.sql:/init.sql:ro
+      - ./database/init.sql:/init.sql:ro
     environment:
       - SA_PASSWORD=${SA_PASSWORD:-YourStrong@Passw0rd}
     command: >
