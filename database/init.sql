@@ -21,6 +21,26 @@ GO
 USE [AceInvoice];
 GO
 
+/* =========================================================
+   Invoice number auto-generation (Sequence + Default)
+   ========================================================= */
+
+-- Create sequence if missing
+IF OBJECT_ID(N'dbo.invoice_number_seq', N'SO') IS NULL
+BEGIN
+    PRINT 'Creating sequence dbo.invoice_number_seq...';
+
+    CREATE SEQUENCE dbo.invoice_number_seq
+        AS INT
+        START WITH 1
+        INCREMENT BY 1;
+END
+ELSE
+BEGIN
+    PRINT 'Sequence dbo.invoice_number_seq already exists.';
+END
+GO
+
 -- 3) Create tables (idempotent)
 
 IF OBJECT_ID(N'dbo.customers', N'U') IS NULL
@@ -84,6 +104,56 @@ END
 ELSE
 BEGIN
     PRINT 'Table dbo.invoices already exists.';
+END
+GO
+
+DECLARE @nextInvoiceNumber INT;
+
+SELECT @nextInvoiceNumber = ISNULL(MAX(invoice_number), 0) + 1
+FROM dbo.invoices;
+
+-- Only bump the sequence forward if needed.
+-- We avoid forcing it backward (which could create duplicates).
+IF @nextInvoiceNumber > 1
+BEGIN
+    DECLARE @currentSeqValue INT;
+
+    -- Get current sequence value (if it has been used). If unused, it will be NULL.
+    SELECT @currentSeqValue = CAST(current_value AS INT)
+    FROM sys.sequences
+    WHERE object_id = OBJECT_ID(N'dbo.invoice_number_seq');
+
+    -- If sequence hasn't been used or is behind, restart it.
+    IF @currentSeqValue IS NULL OR @currentSeqValue < (@nextInvoiceNumber - 1)
+    BEGIN
+        PRINT 'Reseeding dbo.invoice_number_seq...';
+        DECLARE @sql NVARCHAR(200) =
+            N'ALTER SEQUENCE dbo.invoice_number_seq RESTART WITH ' + CAST(@nextInvoiceNumber AS NVARCHAR(20)) + N';';
+        EXEC sys.sp_executesql @sql;
+    END
+END
+GO
+-- Add default constraint for invoice_number
+IF NOT EXISTS (
+    SELECT 1
+    FROM sys.default_constraints dc
+    JOIN sys.columns c
+      ON dc.parent_object_id = c.object_id
+     AND dc.parent_column_id = c.column_id
+    WHERE dc.parent_object_id = OBJECT_ID(N'dbo.invoices')
+      AND c.name = N'invoice_number'
+)
+BEGIN
+    PRINT 'Adding default constraint DF_invoices_invoice_number...';
+
+    ALTER TABLE dbo.invoices
+    ADD CONSTRAINT DF_invoices_invoice_number
+    DEFAULT (NEXT VALUE FOR dbo.invoice_number_seq)
+    FOR invoice_number;
+END
+ELSE
+BEGIN
+    PRINT 'Default constraint for dbo.invoices.invoice_number already exists.';
 END
 GO
 
