@@ -42,17 +42,27 @@ services:
       sqlserver:
         condition: service_healthy
     volumes:
-      - ./database/init.sql:/init.sql:ro
+      - ./database/init:/init:ro
     environment:
       - SA_PASSWORD=${SA_PASSWORD:-YourStrong@Passw0rd}
     command: >
       /bin/bash -c "
-        echo 'Waiting for SQL Server to be ready...';
-        sleep 5;
-        echo 'Running database initialization...';
-        /opt/mssql-tools/bin/sqlcmd -S sqlserver -U sa -P \"$${SA_PASSWORD}\" -C -i /init.sql;
+        set -e;
+        echo 'Running database initialization scripts...';
+
+        for f in /init/*.sql; do
+          echo \"==> Running $$f\";
+          if [[ \"$$(basename \"$$f\")\" == \"00_create_db.sql\" ]]; then
+            /opt/mssql-tools/bin/sqlcmd -S sqlserver -U sa -P \"$${SA_PASSWORD}\" -C -d master -i \"$$f\";
+          else
+            /opt/mssql-tools/bin/sqlcmd -S sqlserver -U sa -P \"$${SA_PASSWORD}\" -C -d AceInvoice -i \"$$f\";
+          fi
+        done
+
         echo 'Database initialization complete!';
       "
+
+
 
   # =============================================
   # YOUR API SERVICE

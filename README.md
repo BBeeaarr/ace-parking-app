@@ -21,6 +21,18 @@ A REST API for managing customers, products, and orders built with Node.js, Expr
    ```
    This will start SQL Server and automatically initialize the database using `database/init.sql`.
 
+   **Check database initialization logs:**
+   ```bash
+   docker compose logs db-init
+   ```
+
+   **Test idempotency (re-run initialization):**
+   ```bash
+   docker compose restart db-init
+   docker compose logs db-init
+   ```
+   The init scripts are designed to be idempotent and can be run multiple times safely.
+
 3. **Configure environment** (optional)
    Create a `.env` file in the root directory:
    ```env
