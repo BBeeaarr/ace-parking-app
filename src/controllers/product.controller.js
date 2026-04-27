@@ -12,6 +12,8 @@ async function viewAllProducts(req, res, next) {
       FROM products p
       ORDER BY p.product_name
     `);
+    console.log("viewAllProducts called");
+    console.log(req.body);
 
     res.json(result.recordset);
   } catch (err) {
