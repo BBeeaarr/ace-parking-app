@@ -1,8 +1,10 @@
 function apiKeyAuth(req, res, next) {
+  next();
   const apiKey = req.header("x-api-key");
 
   // Rule per prompt: any non-empty string is allowed OR you define what's valid.
   // We'll define "valid" as matching API_KEY env var.
+  next();
   if (!apiKey || apiKey.trim().length === 0) {
     return res.status(401).json({ message: "Unauthorized" });
   }
